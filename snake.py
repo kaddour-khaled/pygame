@@ -4,8 +4,11 @@ import pygame
 
 WIDTH, HEIGHT = 900, 500
 UNIT_WIDTH = UNIT_HEIGHT = 15
+FPS = 10 
 
 BASE_LENGTH_SNAKE = 4
+
+
 
 HEAD_COLOR = (255, 0, 0)
 BODY_COLOR = (0, 255, 0)
@@ -27,6 +30,17 @@ def init_snake():
 
     return snake     
 
+def move_snake(snake, DX, DY):
+    # move the snake
+    # remove the queue of the snake (index = len(snake) -1) and add to the head of the snake (index = 0)
+    
+    new_head = snake.pop(len(snake)-1)
+    old_head = snake[0]
+
+    new_head.x = old_head.x+(UNIT_WIDTH * DX)
+    new_head.y = old_head.y+ (UNIT_HEIGHT * DY)
+
+    snake.insert(0, new_head)
 
 def draw_window(snake):
     # draw window and objects
@@ -49,14 +63,36 @@ def draw_window(snake):
 def main():
     # man function
     run = True
+    clock = pygame.time.Clock()
 
     snake = init_snake();
+    DX, DY = 1, 0
+
     while run:
+        clock.tick(FPS)
+
         # handel the events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and DY == 0:
+                    print("up")
+                    DY = -1
+                    DX = 0
+                if event.key == pygame.K_DOWN and DY == 0:
+                    print("down")
+                    DY = 1
+                    DX= 0
+                if event.key == pygame.K_LEFT and DX == 0:
+                    print("left")
+                    DX = -1
+                    DY = 0
+                if event.key == pygame.K_RIGHT and DX == 0:
+                    print("right")
+                    DX = 1
+                    DY = 0  
+        move_snake(snake, DX, DY)
         draw_window(snake)
     
     pygame.quit()
