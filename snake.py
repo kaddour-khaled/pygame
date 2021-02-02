@@ -1,4 +1,5 @@
 import pygame
+import random
 
 # initialize Global variabel
 
@@ -52,7 +53,12 @@ def move_snake(snake, DX, DY):
 
     print(DX, DY)
 
-def draw_window(snake):
+def create_random_food():
+    # create food in window
+    x, y = random.randrange(0, WIDTH-UNIT_WIDTH, UNIT_WIDTH), random.randrange(0, HEIGHT-UNIT_HEIGHT, UNIT_HEIGHT)
+    return pygame.rect.Rect(x, y, UNIT_WIDTH, UNIT_HEIGHT)
+
+def draw_window(snake, food):
     # draw window and objects
 
     # clean the window
@@ -62,11 +68,13 @@ def draw_window(snake):
     # draw the snake on the window
     for (i, r) in enumerate(snake):
         if i == 0:
-            pygame.draw.rect(WINDOW, HEAD_COLOR, r, 0)
+            pygame.draw.rect(WINDOW, HEAD_COLOR, r)
            
         else:
-            pygame.draw.rect(WINDOW, BODY_COLOR, r, 0)
+            pygame.draw.rect(WINDOW, BODY_COLOR, r)
 
+    # draw food
+    pygame.draw.rect(WINDOW, HEAD_COLOR, food)
     # update the window
     pygame.display.update()
 
@@ -75,7 +83,8 @@ def main():
     run = True
     clock = pygame.time.Clock()
 
-    snake = init_snake();
+    snake = init_snake()
+    food = create_random_food()
     DX, DY = 1, 0
 
     while run:
@@ -103,7 +112,7 @@ def main():
                 pygame.time.delay(1000)
                 run = False  
         move_snake(snake, DX, DY)
-        draw_window(snake)
+        draw_window(snake, food)
     
     pygame.quit()
 
