@@ -2,12 +2,13 @@ import pygame
 
 # initialize Global variabel
 
-WIDTH, HEIGHT = 900, 500
-UNIT_WIDTH = UNIT_HEIGHT = 15
-FPS = 10 
+WIDTH, HEIGHT = 900, 510
+UNIT_WIDTH = UNIT_HEIGHT = 10
+FPS = 5
 
 BASE_LENGTH_SNAKE = 4
 
+LOSE_EVENT = pygame.USEREVENT + 1
 
 
 HEAD_COLOR = (255, 0, 0)
@@ -34,13 +35,22 @@ def move_snake(snake, DX, DY):
     # move the snake
     # remove the queue of the snake (index = len(snake) -1) and add to the head of the snake (index = 0)
     
-    new_head = snake.pop(len(snake)-1)
+    
     old_head = snake[0]
 
-    new_head.x = old_head.x+(UNIT_WIDTH * DX)
-    new_head.y = old_head.y+ (UNIT_HEIGHT * DY)
+    new_x_pos = old_head.x + (UNIT_WIDTH * DX)
+    new_y_pos = old_head.y + (UNIT_HEIGHT * DY)
 
-    snake.insert(0, new_head)
+    if new_x_pos < 0 or new_y_pos < 0 or new_x_pos + UNIT_WIDTH > WIDTH or new_y_pos + UNIT_HEIGHT > HEIGHT:
+        pygame.event.post(pygame.event.Event(LOSE_EVENT))
+    else:
+        new_head = snake.pop(len(snake)-1)
+        new_head.x = new_x_pos
+        new_head.y = new_y_pos
+        snake.insert(0, new_head)
+        
+
+    print(DX, DY)
 
 def draw_window(snake):
     # draw window and objects
@@ -77,21 +87,21 @@ def main():
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP and DY == 0:
-                    print("up")
                     DY = -1
                     DX = 0
                 if event.key == pygame.K_DOWN and DY == 0:
-                    print("down")
                     DY = 1
                     DX= 0
                 if event.key == pygame.K_LEFT and DX == 0:
-                    print("left")
                     DX = -1
                     DY = 0
                 if event.key == pygame.K_RIGHT and DX == 0:
-                    print("right")
                     DX = 1
-                    DY = 0  
+                    DY = 0
+            if event.type == LOSE_EVENT:
+                print("lose")
+                pygame.time.delay(1000)
+                run = False  
         move_snake(snake, DX, DY)
         draw_window(snake)
     
