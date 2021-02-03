@@ -1,6 +1,6 @@
 import pygame
 import random
-
+pygame.font.init()
 # initialize Global variabel
 
 WIDTH, HEIGHT = 900, 510
@@ -11,6 +11,7 @@ BASE_LENGTH_SNAKE = 4
 
 LOSE_EVENT = pygame.USEREVENT + 1
 
+SCORE_FONT = pygame.font.SysFont('comicsans', 40)
 
 HEAD_COLOR = (255, 0, 0)
 BODY_COLOR = (0, 255, 0)
@@ -49,7 +50,7 @@ def move_snake(snake, DX, DY):
         new_head.x = new_x_pos
         new_head.y = new_y_pos
         snake.insert(0, new_head)
-         
+
 def create_random_food():
     # create food in window
     x, y = random.randrange(0, WIDTH-UNIT_WIDTH, UNIT_WIDTH), random.randrange(0, HEIGHT-UNIT_HEIGHT, UNIT_HEIGHT)
@@ -86,6 +87,8 @@ def draw_window(snake, food):
         else:
             pygame.draw.rect(WINDOW, BODY_COLOR, r)
 
+    SCORE = SCORE_FONT.render("Score : " + str(len(snake)-BASE_LENGTH_SNAKE), 1, HEAD_COLOR)
+    WINDOW.blit(SCORE, (WIDTH - SCORE.get_width() - 10, SCORE.get_height()+10))
     # draw food
     pygame.draw.rect(WINDOW, HEAD_COLOR, food)
     # update the window
@@ -99,6 +102,7 @@ def main():
     snake = init_snake()
     food = create_random_food()
     DX, DY = 1, 0
+    scoor = 0
 
     while run:
         clock.tick(FPS)
