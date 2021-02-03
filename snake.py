@@ -49,14 +49,27 @@ def move_snake(snake, DX, DY):
         new_head.x = new_x_pos
         new_head.y = new_y_pos
         snake.insert(0, new_head)
-        
-
-    print(DX, DY)
-
+         
 def create_random_food():
     # create food in window
     x, y = random.randrange(0, WIDTH-UNIT_WIDTH, UNIT_WIDTH), random.randrange(0, HEIGHT-UNIT_HEIGHT, UNIT_HEIGHT)
-    return pygame.rect.Rect(x, y, UNIT_WIDTH, UNIT_HEIGHT)
+    return pygame.rect.Rect(x, y, UNIT_WIDTH-1, UNIT_HEIGHT-1)
+
+def detect_collision(snake, food, dx, dy):
+    # eat food
+    if food.colliderect(snake[0]):
+        queue = snake[len(snake)-1]
+        if dx > 0:
+            food.x = queue.x - UNIT_WIDTH
+        if dx < 0:
+            food.x = queue.x + UNIT_WIDTH
+        if dy > 0:
+            food.y = queue.y - UNIT_HEIGHT
+        if dy < 0:
+            food.y = queue.y + UNIT_HEIGHT
+        snake.append(food)
+        food = create_random_food()
+    return food
 
 def draw_window(snake, food):
     # draw window and objects
@@ -112,6 +125,7 @@ def main():
                 pygame.time.delay(1000)
                 run = False  
         move_snake(snake, DX, DY)
+        food = detect_collision(snake, food, DX, DY)
         draw_window(snake, food)
     
     pygame.quit()
