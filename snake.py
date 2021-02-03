@@ -91,11 +91,16 @@ def draw_window(snake, food):
         else:
             pygame.draw.rect(WINDOW, BODY_COLOR, r)
 
-    SCORE = SCORE_FONT.render("Score : " + str(len(snake)-BASE_LENGTH_SNAKE), 1, HEAD_COLOR)
+    SCORE = SCORE_FONT.render("Score : " + str(len(snake)-BASE_LENGTH_SNAKE), 1, BODY_COLOR)
     WINDOW.blit(SCORE, (WIDTH - SCORE.get_width() - 10, SCORE.get_height()+10))
     # draw food
     pygame.draw.rect(WINDOW, HEAD_COLOR, food)
     # update the window
+    pygame.display.update()
+
+def draw_lose_text():
+    LOSE_TEXT = SCORE_FONT.render(" you lose :( !!!", 1, HEAD_COLOR)
+    WINDOW.blit(LOSE_TEXT, (WIDTH//2 - LOSE_TEXT.get_width()//2, HEIGHT//2 - LOSE_TEXT.get_height()//2))
     pygame.display.update()
 
 def main():
@@ -129,8 +134,9 @@ def main():
                     DX = 1
                     DY = 0
             if event.type == LOSE_EVENT:
+                draw_lose_text()
                 pygame.time.delay(1000)
-                run = False  
+                main()
         food = detect_collision(snake, food, DX, DY)
         move_snake(snake, DX, DY)
         draw_window(snake, food)
