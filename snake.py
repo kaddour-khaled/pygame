@@ -42,6 +42,7 @@ def move_snake(snake, DX, DY):
 
     new_x_pos = old_head.x + (UNIT_WIDTH * DX)
     new_y_pos = old_head.y + (UNIT_HEIGHT * DY)
+        
 
     if new_x_pos < 0 or new_y_pos < 0 or new_x_pos + UNIT_WIDTH > WIDTH or new_y_pos + UNIT_HEIGHT > HEIGHT:
         pygame.event.post(pygame.event.Event(LOSE_EVENT))
@@ -49,7 +50,10 @@ def move_snake(snake, DX, DY):
         new_head = snake.pop(len(snake)-1)
         new_head.x = new_x_pos
         new_head.y = new_y_pos
-        snake.insert(0, new_head)
+        if new_head.collidelist(snake) > 0:
+            pygame.event.post(pygame.event.Event(LOSE_EVENT))
+        else:
+            snake.insert(0, new_head)
 
 def create_random_food():
     # create food in window
@@ -125,11 +129,10 @@ def main():
                     DX = 1
                     DY = 0
             if event.type == LOSE_EVENT:
-                print("lose")
                 pygame.time.delay(1000)
                 run = False  
-        move_snake(snake, DX, DY)
         food = detect_collision(snake, food, DX, DY)
+        move_snake(snake, DX, DY)
         draw_window(snake, food)
     
     pygame.quit()
