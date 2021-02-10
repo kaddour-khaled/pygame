@@ -1,17 +1,19 @@
 import pygame
 from pygame.locals import *
+from snake import Snake
 
 class MainApp:
     def __init__(self, width, height):
         # constructor of the MainApp Class
         self.run = True
         self.SIZE = self.WIDTH, self.HEIGHT = width, height 
-        pass
+        self.snake = Snake(width // 2, height // 2)
+
     def on_init(self):
         # initialize pygame and all modules
         # initialize the display 
         pygame.init()
-        pygame.display.set_mode(self.SIZE)
+        self.window = pygame.display.set_mode(self.SIZE)
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
@@ -22,7 +24,9 @@ class MainApp:
         pass
 
     def on_render(self):
-        pass
+        for rect in self.snake.snake:
+            pygame.draw.rect(self.window, (255, 255, 255), rect)
+        pygame.display.update()
     
     def on_cleanup(self):
         pygame.quit()
