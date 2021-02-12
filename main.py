@@ -10,6 +10,20 @@ class MainApp:
         self.run = True
         self.SIZE = self.WIDTH, self.HEIGHT = width, height 
         self.snake = Snake(width // 2, height // 2)
+
+    def on_init(self):
+        # initialize pygame and all modules
+
+        # initialize the display 
+        pygame.init()
+        pygame.font.init()
+        self.lose = False
+        self.USER_EVENT = pygame.USEREVENT + 1
+        self.window = pygame.display.set_mode(self.SIZE)
+        self.FPS = 10
+        self.dx = 1
+        self.dy = 0
+        self.FONT = pygame.font.SysFont("comicsans", 40)
         self.food = pygame.rect.Rect(
             random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT),
             random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT),
@@ -17,19 +31,11 @@ class MainApp:
             Snake.HEIGHT_UNIT-1
             )
 
-    def on_init(self):
-        # initialize pygame and all modules
-
-        # initialize the display 
-        pygame.init()
-        self.window = pygame.display.set_mode(self.SIZE)
-        self.FPS = 10
-        self.dx = 1
-        self.dy = 0
-
     def on_event(self, event):
         if event.type == pygame.QUIT:
             self.run = False
+        if event.type == self.USER_EVENT:
+            self.lose = True
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP and self.dy == 0:
                 self.dx = 0
@@ -56,10 +62,16 @@ class MainApp:
 
         if new_Xpos < self.WIDTH and  new_Xpos >= 0 and new_YPos < self.HEIGHT and new_YPos >= 0:
             queue = snake.pop(len(snake)-1)
-            
             queue.x = new_Xpos
             queue.y = new_YPos
+            if queue.collidelist(snake) > 0:
+                pygame.event.post(pygame.event.Event(self.USER_EVENT))
             snake.insert(0, queue)
+
+        else:
+            pygame.event.post(pygame.event.Event(self.USER_EVENT))
+        
+    
         
         # handel the collision of snake with food
         if head.colliderect(self.food):
@@ -80,6 +92,7 @@ class MainApp:
             Snake.WIDTH_UNIT-1,
             Snake.HEIGHT_UNIT-1
             )
+            
         
 
     def on_render(self):
@@ -95,7 +108,21 @@ class MainApp:
 
         # render the food
         pygame.draw.rect(self.window, (255, 255, 255), self.food)
+        
+        # render text (score + lose text) 
+        Score  = self.FONT.render("Score : " + str(len(self.snake.snake) - Snake.INIT_LENGHT), 1, (255, 255, 255))
+        self.window.blit(
+            Score,
+            (self.WIDTH - Score.get_width()-10, 10)
+            )
 
+        # render lose text
+        if self.lose:
+            lose_text  = self.FONT.render("You lose :(" , 1, (255, 255, 255))
+            self.window.blit(
+                lose_text,
+                (self.WIDTH//2 - Score.get_width()//2, self.HEIGHT//2 - Score.get_height()//2)
+                )
         # update the window
         pygame.display.update()
 
@@ -116,6 +143,9 @@ class MainApp:
                 self.on_event(event)
             self.on_loop()
             self.on_render()
+            if self.lose:
+                pygame.time.delay(2000)
+                self.run = False
         self.on_cleanup()
 
 
