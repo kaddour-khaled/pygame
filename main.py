@@ -10,10 +10,12 @@ class MainApp:
         self.run = True
         self.SIZE = self.WIDTH, self.HEIGHT = width, height 
         self.snake = Snake(width // 2, height // 2)
-        self.food = {
-            'x': random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT), 
-            'y': random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT)
-            }
+        self.food = pygame.rect.Rect(
+            random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT),
+            random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT),
+            Snake.WIDTH_UNIT-1,
+            Snake.HEIGHT_UNIT-1
+            )
 
     def on_init(self):
         # initialize pygame and all modules
@@ -29,24 +31,26 @@ class MainApp:
         if event.type == pygame.QUIT:
             self.run = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP and self.dy == 0:
                 self.dx = 0
                 self.dy = -1
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN and self.dy == 0:
                 self.dx = 0
                 self.dy = 1
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and self.dx == 0:
                 self.dx = -1
                 self.dy = 0
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT and self.dx == 0:
                 self.dx = 1
                 self.dy = 0
     
     def on_loop(self):
         # the game loop
+
         # move the snake
         snake = self.snake.snake
         head = snake[0]
+
         new_Xpos = head.x + (Snake.WIDTH_UNIT * self.dx)
         new_YPos = head.y + (Snake.HEIGHT_UNIT * self.dy)
 
@@ -57,6 +61,25 @@ class MainApp:
             queue.y = new_YPos
             snake.insert(0, queue)
         
+        # handel the collision of snake with food
+        if head.colliderect(self.food):
+            queue = snake[len(snake)- 1]
+            b_queue = snake[len(snake)- 2]
+            new_rect = pygame.rect.Rect(queue.x, queue.y, Snake.WIDTH_UNIT-1, Snake.HEIGHT_UNIT - 1)
+            
+            if queue.x == b_queue.x:
+                new_rect.y += queue.y - b_queue.y
+
+            if queue.y == b_queue.y:
+                new_rect.x += queue.x - b_queue.x
+            snake.append(new_rect)
+
+            self.food = pygame.rect.Rect(
+            random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT),
+            random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT),
+            Snake.WIDTH_UNIT-1,
+            Snake.HEIGHT_UNIT-1
+            )
         
 
     def on_render(self):
@@ -71,8 +94,7 @@ class MainApp:
                 pygame.draw.rect(self.window, (255, 255, 255), r)
 
         # render the food
-        rect_food = pygame.rect.Rect(self.food['x'], self.food['y'], Snake.WIDTH_UNIT-1, Snake.HEIGHT_UNIT-1)
-        pygame.draw.rect(self.window, (255, 255, 255), rect_food)
+        pygame.draw.rect(self.window, (255, 255, 255), self.food)
 
         # update the window
         pygame.display.update()
@@ -88,7 +110,7 @@ class MainApp:
         
         clock =  pygame.time.Clock();
         while self.run:
-            print(self.dx, self.dy)
+            
             clock.tick(self.FPS)
             for event in pygame.event.get():
                 self.on_event(event)
