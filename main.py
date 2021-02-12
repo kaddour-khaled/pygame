@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 from snake import Snake
+import random
+
 
 class MainApp:
     def __init__(self, width, height):
@@ -8,9 +10,14 @@ class MainApp:
         self.run = True
         self.SIZE = self.WIDTH, self.HEIGHT = width, height 
         self.snake = Snake(width // 2, height // 2)
+        self.food = {
+            'x': random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT), 
+            'y': random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT)
+            }
 
     def on_init(self):
         # initialize pygame and all modules
+        
         # initialize the display 
         pygame.init()
         self.window = pygame.display.set_mode(self.SIZE)
@@ -24,9 +31,21 @@ class MainApp:
         pass
 
     def on_render(self):
-        for rect in self.snake.snake:
-            pygame.draw.rect(self.window, (255, 255, 255), rect)
+
+        # render the snake
+        for i, rect in enumerate(self.snake.snake):
+            if i == 0:
+                pygame.draw.rect(self.window, (255, 0, 0), rect)
+            else:
+                pygame.draw.rect(self.window, (255, 255, 255), rect)
+
+        # render the food
+        rect_food = pygame.rect.Rect(self.food['x'], self.food['y'], Snake.WIDTH_UNIT, Snake.HEIGHT_UNIT)
+        pygame.draw.rect(self.window, (255, 255, 255), rect_food)
+
+        # update the window
         pygame.display.update()
+
     
     def on_cleanup(self):
         pygame.quit()
