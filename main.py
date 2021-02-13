@@ -3,13 +3,20 @@ from pygame.locals import *
 from snake import Snake
 import random
 
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+MARGIN = 1
+
+WIDTH_UNIT = Snake.WIDTH_UNIT
+HEIGHT_UNIT = Snake.HEIGHT_UNIT
 
 class MainApp:
     def __init__(self, width, height):
         # constructor of the MainApp Class
         self.run = True
         self.SIZE = self.WIDTH, self.HEIGHT = width, height 
-        self.snake = Snake(width // 2, height // 2)
+        self.snake_obj = Snake(width // 2, height // 2)
 
     def on_init(self):
         # initialize pygame and all modules
@@ -25,10 +32,10 @@ class MainApp:
         self.dy = 0
         self.FONT = pygame.font.SysFont("comicsans", 40)
         self.food = pygame.rect.Rect(
-            random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT),
-            random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT),
-            Snake.WIDTH_UNIT-1,
-            Snake.HEIGHT_UNIT-1
+            random.randrange(0, self.WIDTH - WIDTH_UNIT, WIDTH_UNIT),
+            random.randrange(0, self.HEIGHT - HEIGHT_UNIT, HEIGHT_UNIT),
+            WIDTH_UNIT - MARGIN,
+            HEIGHT_UNIT - MARGIN
             )
 
     def on_event(self, event):
@@ -54,18 +61,22 @@ class MainApp:
         # the game loop
 
         # move the snake
-        snake = self.snake.snake
+        snake = self.snake_obj.snake
         head = snake[0]
 
+        # calcule the pos of new head
         new_Xpos = head.x + (Snake.WIDTH_UNIT * self.dx)
         new_YPos = head.y + (Snake.HEIGHT_UNIT * self.dy)
 
+        # verify bounds 
         if new_Xpos < self.WIDTH and  new_Xpos >= 0 and new_YPos < self.HEIGHT and new_YPos >= 0:
             queue = snake.pop(len(snake)-1)
             queue.x = new_Xpos
             queue.y = new_YPos
+            # self collision
             if queue.collidelist(snake) > 0:
                 pygame.event.post(pygame.event.Event(self.USER_EVENT))
+            
             snake.insert(0, queue)
 
         else:
@@ -77,7 +88,7 @@ class MainApp:
         if head.colliderect(self.food):
             queue = snake[len(snake)- 1]
             b_queue = snake[len(snake)- 2]
-            new_rect = pygame.rect.Rect(queue.x, queue.y, Snake.WIDTH_UNIT-1, Snake.HEIGHT_UNIT - 1)
+            new_rect = pygame.rect.Rect(queue.x, queue.y, WIDTH_UNIT - MARGIN, HEIGHT_UNIT - MARGIN)
             
             if queue.x == b_queue.x:
                 new_rect.y += queue.y - b_queue.y
@@ -87,10 +98,10 @@ class MainApp:
             snake.append(new_rect)
 
             self.food = pygame.rect.Rect(
-            random.randrange(0, self.WIDTH - Snake.WIDTH_UNIT, Snake.WIDTH_UNIT),
-            random.randrange(0, self.HEIGHT - Snake.HEIGHT_UNIT, Snake.HEIGHT_UNIT),
-            Snake.WIDTH_UNIT-1,
-            Snake.HEIGHT_UNIT-1
+            random.randrange(0, self.WIDTH - WIDTH_UNIT, WIDTH_UNIT),
+            random.randrange(0, self.HEIGHT - HEIGHT_UNIT, HEIGHT_UNIT),
+            WIDTH_UNIT - MARGIN,
+            HEIGHT_UNIT - MARGIN
             )
             
         
@@ -98,19 +109,19 @@ class MainApp:
     def on_render(self):
         # clean the window
         pygame.draw.rect(self.window, (0, 0, 0), pygame.rect.Rect(0, 0, self.WIDTH, self.HEIGHT))
-        # render the snake
         
-        for i, r in enumerate(self.snake.snake):
+        # render the snake 
+        for i, r in enumerate(self.snake_obj.snake):
             if i == 0:
-                pygame.draw.rect(self.window, (255, 0, 0), r)
+                pygame.draw.rect(self.window, RED, r)
             else:
-                pygame.draw.rect(self.window, (255, 255, 255), r)
+                pygame.draw.rect(self.window, WHITE, r)
 
         # render the food
-        pygame.draw.rect(self.window, (255, 255, 255), self.food)
+        pygame.draw.rect(self.window, WHITE, self.food)
         
         # render text (score + lose text) 
-        Score  = self.FONT.render("Score : " + str(len(self.snake.snake) - Snake.INIT_LENGHT), 1, (255, 255, 255))
+        Score  = self.FONT.render("Score : " + str(len(self.snake_obj.snake) - Snake.INIT_LENGHT), 1, (255, 255, 255))
         self.window.blit(
             Score,
             (self.WIDTH - Score.get_width()-10, 10)
@@ -118,7 +129,7 @@ class MainApp:
 
         # render lose text
         if self.lose:
-            lose_text  = self.FONT.render("You lose :(" , 1, (255, 255, 255))
+            lose_text  = self.FONT.render("You lose :(" , 1, WHITE)
             self.window.blit(
                 lose_text,
                 (self.WIDTH//2 - Score.get_width()//2, self.HEIGHT//2 - Score.get_height()//2)
